@@ -1,0 +1,202 @@
+====================================================
+  VOTERWATCH SA — LIVE VERSION
+  Deployment Guide for Vercel (Free Hosting)
+====================================================
+
+This guide gets your dashboard live on the internet
+so anyone on any device can access it — for free.
+
+====================================================
+WHAT YOU NEED
+====================================================
+
+  1. Your Gemini API key (starts with AIza...)
+     Get it free at: aistudio.google.com
+
+  2. A free GitHub account
+     Sign up at: github.com
+
+  3. A free Vercel account
+     Sign up at: vercel.com
+
+All three are completely free.
+
+====================================================
+STEP 1 — CREATE A FREE GITHUB ACCOUNT
+====================================================
+
+GitHub is like a Google Drive but for code.
+Vercel reads your code directly from GitHub.
+
+  1. Go to: https://github.com
+  2. Click "Sign up" in the top right
+  3. Enter your email, create a password, choose
+     a username (e.g. voterwatchsa)
+  4. Verify your email address
+  5. On the "What kind of work do you do?" screen
+     just click "Skip personalisation"
+
+====================================================
+STEP 2 — UPLOAD YOUR PROJECT TO GITHUB
+====================================================
+
+  1. Once logged into GitHub, click the green
+     "New" button on the left side
+
+  2. Give your repository a name:
+        voterwatch-sa
+
+  3. Leave everything else as default
+
+  4. Click "Create repository"
+
+  5. You will see a page with setup instructions.
+     Look for the section that says:
+     "uploading an existing file"
+     Click that link.
+
+  6. Drag the entire voterwatch-live FOLDER
+     (or all the files inside it) into the
+     upload area on GitHub
+
+  7. Scroll down and click "Commit changes"
+
+  Your code is now on GitHub!
+
+====================================================
+STEP 3 — CREATE A FREE VERCEL ACCOUNT
+====================================================
+
+Vercel hosts your dashboard online for free.
+
+  1. Go to: https://vercel.com
+  2. Click "Sign Up"
+  3. Click "Continue with GitHub"
+     (This links Vercel to your GitHub account)
+  4. Authorise Vercel to access your GitHub
+  5. You are now logged into Vercel
+
+====================================================
+STEP 4 — DEPLOY YOUR PROJECT ON VERCEL
+====================================================
+
+  1. On the Vercel dashboard, click
+     "Add New..." then "Project"
+
+  2. You will see your GitHub repositories listed
+     Find "voterwatch-sa" and click "Import"
+
+  3. On the configuration screen:
+     - Framework Preset: select "Vite"
+     - Leave everything else as default
+
+  4. IMPORTANT — Before clicking Deploy, you need
+     to add your API key. Look for:
+     "Environment Variables"
+
+  5. Click "Add" and fill in:
+     NAME:  VITE_GEMINI_API_KEY
+     VALUE: (paste your AIza... key here)
+
+  6. Click "Add" to save it
+
+  7. Now click the big "Deploy" button
+
+  8. Wait about 60-90 seconds while it builds
+
+  9. When it says "Congratulations!" you will
+     see a URL like:
+        voterwatch-sa.vercel.app
+
+     That is your LIVE dashboard URL!
+
+====================================================
+STEP 5 — SHARE WITH YOUR TEAM
+====================================================
+
+  1. Copy your Vercel URL
+     (e.g. voterwatch-sa.vercel.app)
+
+  2. Send it to anyone via WhatsApp, email,
+     or any messaging app
+
+  3. They open it in ANY browser on ANY device —
+     phone, laptop, tablet — no setup needed
+
+  4. The dashboard auto-refreshes real SA news
+     every 5 minutes automatically
+
+====================================================
+WHAT YOUR LIVE DASHBOARD DOES
+====================================================
+
+  REAL DATA
+  → Automatically fetches articles from:
+    News24, Daily Maverick, GroundUp,
+    SABC News, IOL, and EWN
+  → Filters only voter registration content
+  → Refreshes every 5 minutes
+
+  AI ANALYSIS (free via Google Gemini)
+  → Click any article for instant AI analysis
+  → Generate a full daily brief for stakeholders
+  → Powered by Google Gemini 1.5 Flash (free)
+
+  LIVE badge
+  → Articles pulled from real feeds show "LIVE"
+  → You can click the headline to read the
+    full article on the news site
+
+  PROVINCE FILTER
+  → Filter by any of the 9 provinces
+  → Province stats update based on real data
+
+====================================================
+UPDATING YOUR DASHBOARD IN FUTURE
+====================================================
+
+Any time you want to update the dashboard:
+  1. Make changes to your files
+  2. Upload the changed files to GitHub
+     (same process as Step 2)
+  3. Vercel automatically detects the change
+     and re-deploys within about 60 seconds
+
+No action needed on Vercel itself.
+
+====================================================
+COSTS — EVERYTHING IS FREE
+====================================================
+
+  GitHub:           Free forever (public repo)
+  Vercel hosting:   Free forever (Hobby plan)
+  Gemini AI:        Free (1,500 requests/day)
+  News RSS feeds:   Free (public feeds)
+
+  Total monthly cost: R0
+
+====================================================
+SOMETHING NOT WORKING?
+====================================================
+
+Dashboard shows "API Key Required"
+  → Check your environment variable in Vercel
+  → Go to Vercel → your project → Settings
+    → Environment Variables
+  → Make sure VITE_GEMINI_API_KEY is set correctly
+  → Redeploy after changing it
+
+"Could not fetch live feed" warning
+  → This is normal if news sites are temporarily
+    down — example data shows automatically
+  → Try clicking Refresh button
+
+Articles not in English
+  → The keyword filter catches most SA languages
+  → You can customise keywords in src/App.jsx
+
+====================================================
+  VoterWatch SA — Version 2.0 Live Edition
+  Built for South African municipal election
+  voter registration monitoring
+====================================================
