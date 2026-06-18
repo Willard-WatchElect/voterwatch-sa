@@ -2,26 +2,10 @@ const TOPICS = {
   voter: {
     label: "Voter Registration",
     keywords: ["voter registration","voters roll","register to vote","IEC","electoral commission","polling station","municipal election","ward","ballot","election","registration drive","voter","voting","registration deadline","kieserregistrasie","ukuvota","ukubhalisa"],
-    fallback: [
-      { id:"v1", source:"News24", province:"Gauteng", time:"2 hr ago", pubDate: new Date().toISOString(), title:"IEC opens new registration points across Tshwane ahead of municipal elections", sentiment:"neutral", category:"official", live:false },
-      { id:"v2", source:"Daily Maverick", province:"Western Cape", time:"3 hr ago", pubDate: new Date(Date.now()-10800000).toISOString(), title:"Cape Town voter registration drive sees record turnout in Mitchell's Plain", sentiment:"positive", category:"registration", live:false },
-      { id:"v3", source:"GroundUp", province:"Eastern Cape", time:"4 hr ago", pubDate: new Date(Date.now()-14400000).toISOString(), title:"Hundreds of Eastern Cape residents still unregistered — civic groups raise alarm", sentiment:"negative", category:"concern", live:false },
-      { id:"v4", source:"SABC News", province:"Limpopo", time:"5 hr ago", pubDate: new Date(Date.now()-18000000).toISOString(), title:"Rural Limpopo communities face transport barriers reaching registration centres", sentiment:"negative", category:"barrier", live:false },
-      { id:"v5", source:"IOL", province:"Gauteng", time:"6 hr ago", pubDate: new Date(Date.now()-21600000).toISOString(), title:"IEC warns: voter registration deadline approaching — check your status now", sentiment:"urgent", category:"deadline", live:false },
-      { id:"v6", source:"EWN", province:"KwaZulu-Natal", time:"7 hr ago", pubDate: new Date(Date.now()-25200000).toISOString(), title:"Youth registration drive gains momentum across Durban townships", sentiment:"positive", category:"registration", live:false },
-    ]
   },
   youth: {
     label: "National Youth Day & IEC",
     keywords: ["national youth day","youth day","june 16","soweto uprising","youth month","IEC","electoral commission","young voters","youth vote","youth registration","student voters","youth parliament","NYDA","young people vote","16 june"],
-    fallback: [
-      { id:"y1", source:"News24", province:"Gauteng", time:"1 hr ago", pubDate: new Date().toISOString(), title:"National Youth Day: IEC urges young South Africans to register to vote", sentiment:"positive", category:"official", live:false },
-      { id:"y2", source:"Daily Maverick", province:"Western Cape", time:"2 hr ago", pubDate: new Date(Date.now()-7200000).toISOString(), title:"June 16 commemorations shine spotlight on youth unemployment and civic participation", sentiment:"neutral", category:"registration", live:false },
-      { id:"y3", source:"SABC News", province:"National", time:"2 hr ago", pubDate: new Date(Date.now()-7200000).toISOString(), title:"Electoral Commission launches Youth Month voter registration campaign", sentiment:"positive", category:"official", live:false },
-      { id:"y4", source:"GroundUp", province:"Gauteng", time:"3 hr ago", pubDate: new Date(Date.now()-10800000).toISOString(), title:"Young voters in townships feel unheard — but registration numbers are climbing", sentiment:"neutral", category:"concern", live:false },
-      { id:"y5", source:"IOL", province:"KwaZulu-Natal", time:"4 hr ago", pubDate: new Date(Date.now()-14400000).toISOString(), title:"Durban Youth Day march calls for better service delivery and access to voting", sentiment:"urgent", category:"barrier", live:false },
-      { id:"y6", source:"EWN", province:"Gauteng", time:"5 hr ago", pubDate: new Date(Date.now()-18000000).toISOString(), title:"NYDA partners with IEC to reach unregistered youth ahead of elections", sentiment:"positive", category:"registration", live:false },
-    ]
   }
 };
 
@@ -89,7 +73,10 @@ function timeAgo(dateStr) {
 
 async function parseFeed(feedUrl, sourceName, keywords) {
   try {
-    const res = await fetch(feedUrl, { headers:{"User-Agent":"VoterWatchSA/3.0"}, signal:AbortSignal.timeout(8000) });
+    const res = await fetch(feedUrl, {
+      headers:{"User-Agent":"VoterWatchSA/4.0"},
+      signal:AbortSignal.timeout(8000)
+    });
     if (!res.ok) return [];
     const xml = await res.text();
     const items = [];
@@ -106,12 +93,29 @@ async function parseFeed(feedUrl, sourceName, keywords) {
       if (cleanTitle && isRelevant(cleanTitle, cleanDesc, keywords)) {
         const province = detectProvince(`${cleanTitle} ${cleanDesc}`);
         const parsedDate = pubDate ? new Date(pubDate).toISOString() : new Date().toISOString();
-        items.push({ id:`${sourceName}-${id++}`, source:sourceName, title:cleanTitle, description:cleanDesc.substring(0,200), link:link.trim(), province, time:timeAgo(pubDate), pubDate:parsedDate, sentiment:detectSentiment(`${cleanTitle} ${cleanDesc}`), category:detectCategory(`${cleanTitle} ${cleanDesc}`), live:true, flagged:false, note:"" });
+        items.push({
+          id:`${sourceName}-${id++}`,
+          source:sourceName,
+          title:cleanTitle,
+          description:cleanDesc.substring(0,300),
+          link:link.trim(),
+          province,
+          time:timeAgo(pubDate),
+          pubDate:parsedDate,
+          sentiment:detectSentiment(`${cleanTitle} ${cleanDesc}`),
+          category:detectCategory(`${cleanTitle} ${cleanDesc}`),
+          live:true,
+          flagged:false,
+          note:""
+        });
       }
       if (items.length >= 6) break;
     }
     return items;
-  } catch(err) { console.error(`Feed error ${sourceName}:`, err.message); return []; }
+  } catch(err) {
+    console.error(`Feed error ${sourceName}:`, err.message);
+    return [];
+  }
 }
 
 export default async function handler(req, res) {
@@ -123,9 +127,16 @@ export default async function handler(req, res) {
   const results = await Promise.allSettled(RSS_FEEDS.map(f => parseFeed(f.url, f.source, keywords)));
   let items = results.filter(r=>r.status==="fulfilled").flatMap(r=>r.value);
   items.sort((a,b) => new Date(b.pubDate)-new Date(a.pubDate));
-  if (items.length === 0) items = topic.fallback;
+  // No fallback — return empty array if no live results
   items = items.map((item,i) => ({...item, id:item.id||i}));
 
   res.setHeader("Cache-Control","s-maxage=300,stale-while-revalidate");
-  res.status(200).json({ items, topic:topicKey, topicLabel:topic.label, fetchedAt:new Date().toISOString(), liveCount:items.filter(i=>i.live).length, totalCount:items.length });
+  res.status(200).json({
+    items,
+    topic:topicKey,
+    topicLabel:topic.label,
+    fetchedAt:new Date().toISOString(),
+    liveCount:items.filter(i=>i.live).length,
+    totalCount:items.length
+  });
 }
